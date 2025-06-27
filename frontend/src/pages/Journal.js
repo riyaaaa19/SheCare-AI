@@ -77,7 +77,8 @@ const Journal = () => {
     setError("");
     setAnalysis("");
     const token = localStorage.getItem("shecare_token");
-    api.post("/journal", { mood, text: entry, date }, {
+    const isoDate = new Date(date).toISOString();
+    api.post("/journal", { mood, text: entry, date: isoDate }, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
       .then(res => {

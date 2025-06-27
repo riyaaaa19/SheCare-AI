@@ -1,25 +1,49 @@
 # SheCare AI
 
-SheCare AI is a comprehensive health tracking and wellness assistant platform designed for women. It combines cycle tracking, mood and symptom journaling, PCOS risk assessment, personalized recommendations, and an AI-powered chatbot for health guidance and support.
+**SheCare AI** is a comprehensive health tracking and wellness assistant platform designed specifically for women. It empowers users with tools to track menstrual cycles, log moods and symptoms, assess PCOS risk, receive personalized health recommendations, and interact with an AI-powered chatbot for timely support.
 
-## Features
-- **User Authentication**: Secure signup and login with JWT-based authentication.
-- **Cycle Tracker**: Log and visualize menstrual cycles, with insights on regularity and length.
-- **Journal**: Record daily moods, symptoms, and notes.
-- **PCOS Checker**: Assess PCOS risk and receive actionable tips.
-- **Personalized Recommendations**: Get health, wellness, and engagement tips based on your data.
-- **AI Chatbot**: Ask health questions and get context-aware answers using Google Gemini.
-- **Profile Management**: Update personal info, cycle length, and more.
+---
 
-## Tech Stack
-- **Backend**: FastAPI, SQLAlchemy, SQLite, Pydantic, Passlib, python-jose, google-generativeai
-- **Frontend**: React, Axios, modern CSS
+## 🌟 Features
 
-## Setup Instructions
+- 🔐 **User Authentication**  
+  Secure signup/login using JWT-based authentication.
+
+- 📆 **Cycle Tracker**  
+  Log menstrual cycles, visualize regularity, and gain cycle-based insights.
+
+- 📓 **Journal**  
+  Record daily moods, symptoms, and personal notes.
+
+- 🧬 **PCOS Checker**  
+  Submit symptoms and receive PCOS risk level with personalized guidance.
+
+- 💡 **Personalized Recommendations**  
+  Get contextual tips on health, well-being, and engagement based on your data.
+
+- 🤖 **AI Chatbot (Google Gemini)**  
+  Ask health-related questions and receive context-aware answers.
+
+- 👤 **Profile Management**  
+  Manage personal info such as age, height, weight, and cycle length.
+
+---
+
+## 🧰 Tech Stack
+
+- **Backend**:  
+  `FastAPI`, `SQLAlchemy`, `SQLite`, `Pydantic`, `Passlib`, `python-jose`, `google-generativeai`
+
+- **Frontend**:  
+  `React`, `Axios`, `Modern CSS`
+
+---
+
+## ⚙️ Setup Instructions
 
 ### 1. Clone the Repository
 ```bash
-git clone <repo-url>
+git clone <https://github.com/sonamnimje/SheCare-AI.git>
 cd SheCare-AI
 ```
 
@@ -31,12 +55,11 @@ venv\Scripts\activate  # On Windows
 pip install -r app/requirements.txt
 ```
 
-- **Environment Variables**: Create a `.env` file in `backend/app/` with:
-  ```env
-  DATABASE_TYPE=sqlite
-  SECRET_KEY=your_secret_key_here
-  GOOGLE_API_KEY=your_google_gemini_api_key_here
-  ```
+- **Environment Variables**: Create a .env file in backend/app/ and include the following:
+
+- `DATABASE_TYPE`: Database backend (default: sqlite)
+- `SECRET_KEY`: Secret for JWT signing (keep this private!)
+- `GOOGLE_API_KEY`: Google Gemini API key for chatbot (keep this private!)
 - **Database**: The app uses SQLite by default. The database file is `backend/shecare.db`.
 - **Run the Backend**:
   ```bash
@@ -52,17 +75,14 @@ npm install
 npm start
 ```
 - The frontend will run at `http://localhost:3000`.
-- Make sure the backend is running for full functionality.
+- ⚠️Ensure the backend server is running for full app functionality.
 
-## Environment Variables
-- `DATABASE_TYPE`: Database backend (default: sqlite)
-- `SECRET_KEY`: Secret for JWT signing (keep this private!)
-- `GOOGLE_API_KEY`: Google Gemini API key for chatbot (keep this private!)
 
 ## Authentication
 - JWT tokens are used for all protected endpoints.
-- The frontend stores the token in `localStorage` as `token`.
-- All API requests to protected endpoints must include:
+- JWT tokens are issued upon login and stored in localStorage as token.
+- All protected API calls must include the token in headers:
+
   ```
   Authorization: Bearer <token>
   ```
@@ -90,10 +110,11 @@ npm start
   - 🧬 Maintain a healthy diet, exercise regularly, and consult a gynecologist if concerned.
 
 ## Chatbot Integration
-- Uses Google Gemini via `google-generativeai` SDK.
+- Powered via google-generativeai SDK.
 - Loads API key from `.env`.
-- Provides context-aware answers using recent user data (cycles, moods, journals).
-- Always returns plain text responses.
+- Uses JWT-authenticated user context (recent journals, mood, cycle) for smart responses.
+- Only returns plain text for simplicity and compatibility.
+
 
 ## Troubleshooting
 - **401 Unauthorized**: Log out and log in again to get a fresh token. Ensure the token uses the `sub` field for user ID.
@@ -101,22 +122,15 @@ npm start
 - **Database issues**: Delete `shecare.db` and restart the backend to reset data (for development only).
 - **CORS errors**: The backend enables CORS for all origins by default.
 
-## License
-MIT License
+## 📄 License
 
----
+This project is licensed under the MIT License — feel free to use and contribute.
 
-## .env File Example
-Create a `.env` file in `backend/app/` with the following variables:
+## 🤝 Contributing
 
-```env
-
-- `DATABASE_TYPE`: Database backend (default: sqlite)
-- `SECRET_KEY`: Secret for JWT signing (keep this private!)
-- `GOOGLE_API_KEY`: Google Gemini API key for chatbot (keep this private!)
-
----
-
+Pull requests and issues are welcome!
 For questions or contributions, please open an issue or pull request!
+
+## Made with 💗 to support women's health and wellness.
 
 ---

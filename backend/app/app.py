@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status, Body
+from fastapi import FastAPI, HTTPException, Depends, status, Body, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -13,8 +13,7 @@ from dotenv import load_dotenv
 from .models import User, PCOSCheck, CycleEntry, JournalEntry, Recommendation
 from .database import SessionLocal, engine
 from . import models
-import google.generativeai as genai
-from fastapi.responses import JSONResponse
+import requests
 
 # Absolute path to .env
 env_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -53,6 +52,9 @@ class UserCreate(BaseModel):
     weight: int = None
     cycle_length: int = None
     bio: str = None
+    
+    class Config:
+        from_attributes = True
 
 class UserOut(BaseModel):
     id: int
@@ -69,9 +71,15 @@ class UserOut(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    
+    class Config:
+        from_attributes = True
 
 class TokenData(BaseModel):
     user_id: int = None
+    
+    class Config:
+        from_attributes = True
 
 class UserUpdate(BaseModel):
     full_name: str = None
@@ -81,10 +89,16 @@ class UserUpdate(BaseModel):
     weight: int = None
     cycle_length: int = None
     bio: str = None
+    
+    class Config:
+        from_attributes = True
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    
+    class Config:
+        from_attributes = True
 
 class PCOSCheckOut(BaseModel):
     id: int
@@ -100,6 +114,9 @@ class CycleEntryIn(BaseModel):
     start_date: datetime
     end_date: datetime = None
     notes: str = None
+    
+    class Config:
+        from_attributes = True
 
 class CycleEntryOut(BaseModel):
     id: int
@@ -115,6 +132,9 @@ class JournalEntryIn(BaseModel):
     mood: str
     text: str
     analysis: str = None
+    
+    class Config:
+        from_attributes = True
 
 class JournalEntryOut(BaseModel):
     id: int
@@ -219,7 +239,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 @app.get("/auth/me", response_model=UserOut)
 def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+    return UserOut.from_orm(current_user)
 
 @app.get("/dashboard")
 def dashboard(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -415,49 +435,6 @@ def delete_journal_entry(entry_id: int, db: Session = Depends(get_db), current_u
     db.commit()
     return {"message": "Journal entry soft-deleted"}
 
-# Chatbot endpoint
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
-
-@app.post("/chatbot")
-def chatbot(request: dict = Body(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    user_message = request.get("message", "")
-    if not user_message:
-        return JSONResponse(content={"response": ""})
-    try:
-        # Fetch recent cycles and journals
-        cycles = db.query(CycleEntry).filter(CycleEntry.user_id == current_user.id).order_by(CycleEntry.start_date.desc()).limit(3).all()
-        journals = db.query(JournalEntry).filter(JournalEntry.user_id == current_user.id).order_by(JournalEntry.date.desc()).limit(5).all()
-
-        # Summarize cycles
-        cycle_summary = "; ".join([
-            f"{c.start_date.date()} (length: {((cycles[i].start_date - cycles[i+1].start_date).days) if i+1 < len(cycles) else 'N/A'})"
-            for i, c in enumerate(cycles)
-        ]) if cycles else "No recent cycles."
-        # Summarize moods
-        mood_summary = "; ".join([f"{j.date.date()}: {j.mood}" for j in journals if j.mood]) if journals else "No recent moods."
-
-        # Compose context
-        context = f"Recent cycles: {cycle_summary}\nRecent moods: {mood_summary}\n"
-        prompt = f"{context}\nUser question: {user_message}\nAnswer:"
-
-        models = [m.name for m in genai.list_models()]
-        for model_name in models:
-            if "gemini" in model_name:
-                try:
-                    model = genai.GenerativeModel(model_name)
-                    response = model.generate_content(prompt)
-                    clean_text = response.text.replace('\n', '').replace('\r', '').strip().strip('"')
-                    return JSONResponse(content={"response": clean_text})
-                except Exception as e:
-                    print(f"Gemini model error: {e}")
-                    continue
-        print("No supported Gemini model found.")
-        return JSONResponse(content={"response": "Sorry, no supported Gemini model found."})
-    except Exception as e:
-        print(f"Chatbot endpoint error: {e}")
-        return JSONResponse(content={"response": f"Sorry, an error occurred: {str(e)}"})
-
 # Recommendations endpoint
 @app.get("/recommendations", response_model=List[RecommendationOut])
 def get_recommendations(
@@ -636,6 +613,47 @@ def get_all_users(db: Session = Depends(get_db)):
             "full_name": user.full_name,
         } for user in users
     ]
+
+@app.post("/chatbot")
+async def chatbot(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Chatbot endpoint using Google Gemini Generative AI.
+    Expects JSON: {"message": "user's question"}
+    Returns: {"response": "AI reply"}
+    """
+    try:
+        data = await request.json()
+        user_message = data.get("message")
+        if not user_message:
+            raise HTTPException(status_code=400, detail="Message is required.")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid request body.")
+
+    # Gather recent journal and cycle context for personalization
+    recent_journals = db.query(JournalEntry).filter(JournalEntry.user_id == current_user.id).order_by(JournalEntry.date.desc()).limit(3).all()
+    context = "\n".join([
+        f"Journal ({j.date.date()}): Mood: {j.mood}, Text: {j.text}" for j in recent_journals
+    ])
+    prompt = f"User context:\n{context}\n\nUser question: {user_message}\n\nRespond as a friendly women's health assistant."
+
+    # Call Gemini API (REST)
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    if not GEMINI_API_KEY:
+        return {"response": "Gemini API key not set. Please set GEMINI_API_KEY in your .env file."}
+
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=" + GEMINI_API_KEY
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}]
+    }
+    try:
+        resp = requests.post(url, json=payload, timeout=15)
+        resp.raise_for_status()
+        gemini_data = resp.json()
+        ai_reply = gemini_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "Sorry, I couldn't generate a response.")
+    except Exception as e:
+        return {"response": f"Failed to get AI response: {str(e)}"}
+
+    return {"response": ai_reply}
 
 if __name__ == "__main__":
     import uvicorn

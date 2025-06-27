@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from pydantic import BaseModel
 
 try:
     from .database import Base
@@ -23,6 +24,9 @@ class User(Base):
     cycle_entries = relationship("CycleEntry", back_populates="user")
     journal_entries = relationship("JournalEntry", back_populates="user")
     recommendations = relationship("Recommendation", back_populates="user")
+
+    class Config:
+        from_attributes = True
 
 class PCOSCheck(Base):
     __tablename__ = "pcos_checks"
@@ -63,3 +67,12 @@ class Recommendation(Base):
     text = Column(Text)
     date = Column(DateTime, default=datetime.utcnow)
     user = relationship("User", back_populates="recommendations") 
+
+    class Config:
+        from_attributes = True 
+
+class JournalEntryIn(BaseModel):
+    date: datetime = None
+    mood: str
+    text: str
+    analysis: str = None 
