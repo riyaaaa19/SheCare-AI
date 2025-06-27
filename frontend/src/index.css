@@ -1,0 +1,80 @@
+:root {
+  --primary: #d72660;
+  --secondary: #fce4ec;
+  --bg: #f8f9fa;
+  --text: #333;
+  --radius: 18px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --font: 'Nunito', sans-serif;
+}
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+}
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  background: #fff0f6;
+  border-bottom: 1px solid #fce4ec;
+  padding: 10px 0;
+}
+nav a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+nav a:hover, nav a.active {
+  background: var(--secondary);
+}
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+}
+@media (max-width: 900px) {
+  .card-grid {
+    gap: 16px;
+  }
+}
+@media (max-width: 600px) {
+  .card-grid {
+    flex-direction: column;
+    gap: 12px;
+  }
+  nav {
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 0;
+  }
+  form, .responsive-card, .responsive-panel {
+    min-width: unset !important;
+    max-width: 98vw !important;
+    padding: 18px !important;
+  }
+  h2 {
+    font-size: 1.3rem !important;
+  }
+}
+form, .responsive-card, .responsive-panel {
+  min-width: 340px;
+  max-width: 420px;
+  width: 100%;
+  box-sizing: border-box;
+}
+input, textarea, button {
+  font-family: inherit;
+  font-size: 1rem;
+}
+button {
+  transition: background 0.2s, color 0.2s;
+}
