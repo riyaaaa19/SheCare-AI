@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Login from "./pages/Login";
@@ -7,113 +7,57 @@ import Dashboard from "./pages/Dashboard";
 import PCOSChecker from "./pages/PCOSChecker";
 import CycleTracker from "./pages/CycleTracker";
 import Journal from "./pages/Journal";
-import Chatbot from "./pages/Chatbot";
+// import Chatbot from "./pages/Chatbot";
 import Recommendations from "./pages/Recommendations";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
+import OmniTextChatbot from "./pages/OmniTextChatbot";
 
-const Landing = () => {
+const NavBar = () => {
   const navigate = useNavigate();
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #ffe0ec 0%, #f8f9fa 100%)",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: 32,
-      position: "relative"
-    }}>
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+    <nav
+      style={{
+        padding: "10px 24px",
+        borderBottom: "1px solid #ccc",
+        background: "#fff0f6",
+        display: "flex",
+        alignItems: "center",
+        gap: 0,
+        minHeight: 64,
+      }}
+    >
+      <div
+        onClick={() => navigate("/profile")}
         style={{
-          background: "#fff",
-          borderRadius: 24,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
-          padding: 40,
-          maxWidth: 600,
-          textAlign: "center"
-        }}
-      >
-        <img src="/logo1.png" alt="SheCare AI Logo" style={{ width: 280, marginBottom: 35}} />
-        <h1 style={{ fontSize: 36, color: "#d72660", marginBottom: 12 }}>SheCare AI</h1>
-        <h2 style={{ fontWeight: 400, color: "#333", marginBottom: 24 }}>
-          Empowering Women Through AI-Powered Health Insights
-        </h2>
-        <p style={{ color: "#555", fontSize: 18, marginBottom: 32 }}>
-          SheCare AI is your smart, web-based wellness assistant. Get holistic, personalized health insights using the power of Machine Learning and Natural Language Processing. Understand your physical and emotional health—every day.
-        </p>
-        <Link to="/signup">
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.97 }}
-            style={{
-              background: "#d72660",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              padding: "14px 32px",
-              fontSize: 18,
-              cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(215,38,96,0.08)"
-            }}
-          >
-            Get Started
-          </motion.button>
-        </Link>
-        <div className="feature-cards" style={{ marginTop: 40, display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
-          <Feature icon="💡" title="Personalized Insights" />
-          <Feature icon="🤖" title="AI Chatbot" />
-          <Feature icon="🩺" title="PCOS Risk Checker" />
-          <Feature icon="📅" title="Cycle Tracker" />
-          <Feature icon="📝" title="Emotional Journal" />
-        </div>
-      </motion.div>
-      {/* Floating Chatbot Icon */}
-      <button
-        onClick={() => navigate("/chatbot")}
-        style={{
-          position: "fixed",
-          bottom: 32,
-          right: 32,
-          background: "#d72660",
-          color: "#fff",
-          border: "none",
+          width: 44,
+          height: 44,
           borderRadius: "50%",
-          width: 64,
-          height: 64,
-          boxShadow: "0 4px 16px rgba(215,38,96,0.18)",
+          background: "#ffe0ec",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 32,
+          border: "2px solid #d72660",
+          fontSize: 26,
           cursor: "pointer",
-          zIndex: 1000
+          marginRight: 32,
+          userSelect: "none",
+          transition: "box-shadow 0.2s",
+          boxShadow: "0 2px 8px rgba(215,38,96,0.08)",
         }}
-        title="Chat with AI"
+        title="Profile"
       >
-        <span role="img" aria-label="Chatbot">💬</span>
-      </button>
-      <footer style={{
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        width: "100%",
-        background: "#fff0f6",
-        color: "#d72660",
-        textAlign: "center",
-        padding: 16,
-        fontSize: 16,
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        boxShadow: "0 -2px 8px rgba(215,38,96,0.04)"
-      }}>
-        © {new Date().getFullYear()} SheCare AI. Empowering Women Everywhere.
-      </footer>
-    </div>
+        <span role="img" aria-label="profile">👧</span>
+      </div>
+      <div style={{ display: "flex", gap: 40, flex: 1, justifyContent: "center" }}>
+        <Link to="/" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Home</Link>
+        <Link to="/dashboard" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Dashboard</Link>
+        <Link to="/pcos-checker" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>PCOS Checker</Link>
+        <Link to="/cycle-tracker" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Cycle Tracker</Link>
+        <Link to="/journal" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Journal</Link>
+        <Link to="/recommendations" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Recommendations</Link>
+      </div>
+    </nav>
   );
 };
 
@@ -141,20 +85,128 @@ const Feature = ({ icon, title }) => (
 );
 
 function App() {
+  const [showVoiceWidget, setShowVoiceWidget] = useState(false);
+
   return (
     <Router>
-      <nav style={{ padding: 10, borderBottom: "1px solid #ccc" }}>
-        <Link to="/" style={{ margin: 5 }}>Home</Link>
-        <Link to="/login" style={{ margin: 5 }}>Login</Link>
-        <Link to="/signup" style={{ margin: 5 }}>Signup</Link>
-        <Link to="/dashboard" style={{ margin: 5 }}>Dashboard</Link>
-        <Link to="/profile" style={{ margin: 5 }}>Profile</Link>
-        <Link to="/pcos-checker" style={{ margin: 5 }}>PCOS Checker</Link>
-        <Link to="/cycle-tracker" style={{ margin: 5 }}>Cycle Tracker</Link>
-        <Link to="/journal" style={{ margin: 5 }}>Journal</Link>
-        <Link to="/chatbot" style={{ margin: 5 }}>Chatbot</Link>
-        <Link to="/recommendations" style={{ margin: 5 }}>Recommendations</Link>
-      </nav>
+      <NavBar />
+
+      {/* Microphone Icon Button */}
+      <button
+        onClick={() => setShowVoiceWidget(true)}
+        style={{
+          position: "fixed",
+          bottom: 110,
+          right: 32,
+          background: "#fff",
+          color: "#d72660",
+          border: "2px solid #d72660",
+          borderRadius: "50%",
+          width: 56,
+          height: 56,
+          boxShadow: "0 2px 8px rgba(215,38,96,0.12)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 28,
+          cursor: "pointer",
+          zIndex: 1001
+        }}
+        title="Open Voice Agent"
+      >
+        <span role="img" aria-label="Microphone">🎤</span>
+      </button>
+
+      {/* Modal for Voice Agent */}
+      {showVoiceWidget && (
+        <>
+          <div
+            onClick={() => setShowVoiceWidget(false)}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              background: "rgba(0,0,0,0.25)",
+              zIndex: 1999
+            }}
+          />
+          <div
+            style={{
+              position: "fixed",
+              top: 80,
+              right: 40,
+              width: 340,
+              height: 480,
+              maxWidth: "95vw",
+              maxHeight: "90vh",
+              background: "#ffe0ec",
+              borderRadius: 16,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+              zIndex: 2000,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "stretch",
+              border: "1px solid #eee",
+              padding: 0,
+              overflow: "hidden"
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 20px",
+                background: "#d72660",
+                color: "#fff",
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                fontWeight: 600,
+                fontSize: 20
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <img src="/logo1.png" alt="SheCare AI Logo" style={{ width: 36, height: 36, borderRadius: "50%" }} />
+                <span>SheCare Voice Agent</span>
+              </div>
+              <button
+                onClick={() => setShowVoiceWidget(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  fontSize: 28,
+                  color: "#fff",
+                  cursor: "pointer",
+                  marginLeft: 8
+                }}
+                title="Close"
+              >
+                ×
+              </button>
+            </div>
+            <iframe
+              src="https://www.omnidim.io/voice-widget?secret=d23dc04eb6eef81dfaa93ec2a3bb09cb"
+              width="100%"
+              height="100%"
+              style={{
+                border: "none",
+                borderRadius: "0 0 16px 16px",
+                flex: 1,
+                minHeight: 0
+              }}
+              allow="microphone"
+              title="SheCare Voice Agent"
+            />
+          </div>
+        </>
+      )}
+
+      {/* OmniDimension SheBot floating chat icon */}
+      <OmniTextChatbot />
+
+      {/* Main App Routes */}
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
@@ -164,12 +216,93 @@ function App() {
         <Route path="/pcos-checker" element={<PCOSChecker />} />
         <Route path="/cycle-tracker" element={<CycleTracker />} />
         <Route path="/journal" element={<Journal />} />
-        <Route path="/chatbot" element={<Chatbot />} />
+        {/* <Route path="/chatbot" element={<Chatbot />} /> */}
         <Route path="/recommendations" element={<Recommendations />} />
         <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </Router>
   );
 }
+
+const Landing = () => (
+  <div
+    style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #ffe0ec 0%, #f8f9fa 100%)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 32,
+      position: "relative"
+    }}
+  >
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      style={{
+        background: "#fff",
+        borderRadius: 24,
+        boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+        padding: 40,
+        maxWidth: 600,
+        textAlign: "center"
+      }}
+    >
+      <img src="/logo1.png" alt="SheCare AI Logo" style={{ width: 280, marginBottom: 35 }} />
+      <h1 style={{ fontSize: 36, color: "#d72660", marginBottom: 12 }}>SheCare AI</h1>
+      <h2 style={{ fontWeight: 400, color: "#333", marginBottom: 24 }}>
+        Empowering Women Through AI-Powered Health Insights
+      </h2>
+      <p style={{ color: "#555", fontSize: 18, marginBottom: 32 }}>
+        SheCare AI is your smart, web-based wellness assistant. Get holistic, personalized health insights using the power of Machine Learning and Natural Language Processing. Understand your physical and emotional health—every day.
+      </p>
+      <Link to="/signup">
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.97 }}
+          style={{
+            background: "#d72660",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            padding: "14px 32px",
+            fontSize: 18,
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(215,38,96,0.08)"
+          }}
+        >
+          Get Started
+        </motion.button>
+      </Link>
+      <div className="feature-cards" style={{ marginTop: 40, display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
+        <Feature icon="💡" title="Personalized Insights" />
+        <Feature icon="🤖" title="Voice Agent" />
+        <Feature icon="🩺" title="PCOS Risk Checker" />
+        <Feature icon="📅" title="Cycle Tracker" />
+        <Feature icon="📝" title="Emotional Journal" />
+      </div>
+    </motion.div>
+    <footer
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        width: "100%",
+        background: "#fff0f6",
+        color: "#d72660",
+        textAlign: "center",
+        padding: 16,
+        fontSize: 16,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        boxShadow: "0 -2px 8px rgba(215,38,96,0.04)"
+      }}
+    >
+      © {new Date().getFullYear()} SheCare AI. Empowering Women Everywhere.
+    </footer>
+  </div>
+);
 
 export default App;
