@@ -2,6 +2,19 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
 
+// Helper function to calculate cycle day number from date string
+function getCycleDayNumber(cycleDayStr) {
+  if (!cycleDayStr) return "-";
+  // Parse as local date (ignore time zone issues)
+  const [year, month, day] = cycleDayStr.split('-').map(Number);
+  const start = new Date(year, month - 1, day);
+  const today = new Date();
+  start.setHours(0,0,0,0);
+  today.setHours(0,0,0,0);
+  const diff = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
+  return diff > 0 ? diff : "-";
+}
+
 const Dashboard = () => {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -10,10 +23,7 @@ const Dashboard = () => {
   useEffect(() => {
     setLoading(true);
     setError("");
-    const token = localStorage.getItem("shecare_token");
-    api.get("/dashboard", {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    })
+    api.get("/dashboard")
       .then(res => setData(res.data))
       .catch(() => setError("Failed to load dashboard data."))
       .finally(() => setLoading(false));
@@ -42,15 +52,15 @@ const Dashboard = () => {
         {loading && <div>Loading...</div>}
         {error && <div style={{ color: "#d72660", marginBottom: 12 }}>{error}</div>}
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginBottom: 32 }}>
-          <SummaryWidget title="Cycle Day" value={data.cycleDay || "-"} icon="📅" />
+          <SummaryWidget title="Cycle Day" value={getCycleDayNumber(data.cycle_day)} icon="📅" />
           <SummaryWidget title="Mood" value={data.mood || "-"} icon="📝" />
-          <SummaryWidget title="PCOS Risk" value={data.pcosRisk || "-"} icon="🩺" />
+          <SummaryWidget title="PCOS Risk" value={data.pcos_risk || "-"} icon="🩺" />
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "center" }}>
           <DashboardCard title="PCOS Risk" desc="Check your risk" link="/pcos-checker" icon="🩺" />
           <DashboardCard title="Cycle Tracker" desc="Track your cycle" link="/cycle-tracker" icon="📅" />
           <DashboardCard title="Journal" desc="Log your emotions" link="/journal" icon="📝" />
-          <DashboardCard title="Chatbot" desc="Ask health questions" link="/chatbot" icon="🤖" />
+          <DashboardCard title="SheBot" desc="Ask health questions" link="/chatbot" icon="🤖" />
           <DashboardCard title="Recommendations" desc="Personalized tips" link="/recommendations" icon="💡" />
         </div>
       </div>
@@ -105,4 +115,4 @@ const DashboardCard = ({ title, desc, link, icon }) => (
   </Link>
 );
 
-export default Dashboard; 
+export default Dashboard;

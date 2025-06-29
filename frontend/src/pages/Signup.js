@@ -24,11 +24,10 @@ const Signup = () => {
     setError("");
     setLoading(true);
     try {
-      const res = await api.post("/auth/signup", { full_name: name, email, password });
-      // Save user info/token to localStorage
-      localStorage.setItem("shecare_user", JSON.stringify(res.data));
+      await api.post("/auth/signup", { full_name: name, email, password });
       setLoading(false);
-      navigate("/dashboard");
+      // Redirect to login page after successful signup
+      navigate("/login");
     } catch (err) {
       setError(err.response?.data?.detail || "Signup failed.");
       setLoading(false);
@@ -65,4 +64,4 @@ const Signup = () => {
   );
 };
 
-export default Signup; 
+export default Signup;

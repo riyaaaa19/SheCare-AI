@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from "react";
 import api from "../api";
 
+// Always treat yyyy-mm-dd as local date, never use new Date(str) directly!
 function formatDate(date) {
-  return new Date(date).toISOString().slice(0, 10);
+  if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date;
+  }
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function addDays(dateStr, days) {
-  const date = new Date(dateStr);
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
   date.setDate(date.getDate() + days);
   return formatDate(date);
 }
@@ -20,12 +29,17 @@ function getFertileAndOvulation(startDate, cycleLength = 28) {
 
 function getNextPeriodDate(events, cycleLength) {
   if (!events.length) return null;
-  // Assume events are sorted by start_date descending
-  const lastStart = new Date(events[0].start_date);
-  const nextPeriod = new Date(lastStart);
-  nextPeriod.setDate(lastStart.getDate() + cycleLength);
-  return nextPeriod.toISOString().slice(0, 10);
+  const [year, month, day] = formatDate(events[0].start_date).split("-").map(Number);
+  const lastStart = new Date(year, month - 1, day);
+  lastStart.setHours(0, 0, 0, 0);
+  lastStart.setDate(lastStart.getDate() + cycleLength);
+  return formatDate(lastStart);
 }
+
+const monthNames = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
 
 const CycleTracker = () => {
   const [events, setEvents] = useState([]);
@@ -35,6 +49,9 @@ const CycleTracker = () => {
   const [userData, setUserData] = useState({ cycleLength: 28, age: "", weight: "" });
   const [userLoading, setUserLoading] = useState(false);
   const [userError, setUserError] = useState("");
+  // Month navigation state
+  const [displayYear, setDisplayYear] = useState(null);
+  const [displayMonth, setDisplayMonth] = useState(null);
 
   // Load user data (cycleLength, age, weight) on mount
   useEffect(() => {
@@ -59,6 +76,19 @@ const CycleTracker = () => {
     fetchEntries();
   }, []);
 
+  useEffect(() => {
+    // Set initial display month to latest entry or current month
+    if (events.length > 0) {
+      const [y, m] = formatDate(events[0].start_date).split("-").map(Number);
+      setDisplayYear(y);
+      setDisplayMonth(m - 1);
+    } else {
+      const today = new Date();
+      setDisplayYear(today.getFullYear());
+      setDisplayMonth(today.getMonth());
+    }
+  }, [events.length]);
+
   const fetchEntries = () => {
     setLoading(true);
     setError("");
@@ -78,11 +108,18 @@ const CycleTracker = () => {
     setLoading(true);
     setError("");
     const token = localStorage.getItem("shecare_token");
-    const isoDate = new Date(startDate).toISOString();
     api
-      .post("/cycle-tracker", { start_date: isoDate }, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      })
+      .post(
+        "/cycle-tracker",
+        {
+          start_date: startDate,
+          end_date: null,
+          notes: ""
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        }
+      )
       .then(() => {
         setStartDate("");
         fetchEntries();
@@ -104,29 +141,62 @@ const CycleTracker = () => {
       .finally(() => setLoading(false));
   };
 
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // Month navigation handlers
+  const handlePrevMonth = () => {
+    if (displayMonth === 0) {
+      setDisplayMonth(11);
+      setDisplayYear(displayYear - 1);
+    } else {
+      setDisplayMonth(displayMonth - 1);
+    }
+  };
+  const handleNextMonth = () => {
+    if (displayMonth === 11) {
+      setDisplayMonth(0);
+      setDisplayYear(displayYear + 1);
+    } else {
+      setDisplayMonth(displayMonth + 1);
+    }
+  };
 
+  if (displayYear === null || displayMonth === null) return null;
+
+  const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
   const calendarDays = Array.from({ length: daysInMonth }, (_, i) =>
-    formatDate(new Date(year, month, i + 1))
+    formatDate(new Date(displayYear, displayMonth, i + 1))
   );
 
+  // --- Calculate period, ovulation, and fertile days for this month only ---
   const periodDates = new Set();
   const ovulationDates = new Set();
   const fertileDates = new Set();
 
   events.forEach((e) => {
     const start = formatDate(e.start_date);
+
+    // Mark period days (5 days from start)
     for (let i = 0; i < 5; i++) {
-      periodDates.add(addDays(start, i));
+      const day = addDays(start, i);
+      if (day.startsWith(`${displayYear}-${String(displayMonth + 1).padStart(2, "0")}`)) {
+        periodDates.add(day);
+      }
     }
+
+    // Calculate ovulation and fertile window for this cycle
     const { ovulationDay, fertileStart, fertileEnd } = getFertileAndOvulation(start, userData.cycleLength);
-    ovulationDates.add(ovulationDay);
-    const range = new Date(fertileEnd) - new Date(fertileStart);
-    for (let i = 0; i <= range / (1000 * 60 * 60 * 24); i++) {
-      fertileDates.add(addDays(fertileStart, i));
+
+    if (ovulationDay.startsWith(`${displayYear}-${String(displayMonth + 1).padStart(2, "0")}`)) {
+      ovulationDates.add(ovulationDay);
+    }
+
+    let fertile = new Date(fertileStart);
+    const fertileEndDate = new Date(fertileEnd);
+    while (fertile <= fertileEndDate) {
+      const day = formatDate(fertile);
+      if (day.startsWith(`${displayYear}-${String(displayMonth + 1).padStart(2, "0")}`)) {
+        fertileDates.add(day);
+      }
+      fertile.setDate(fertile.getDate() + 1);
     }
   });
 
@@ -179,6 +249,7 @@ const CycleTracker = () => {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
+            placeholder="yyyy-mm-dd"
             style={{
               padding: 10,
               borderRadius: 6,
@@ -206,6 +277,35 @@ const CycleTracker = () => {
         )}
         <div style={{ marginBottom: 18 }}>
           <h4 style={{ color: "#b71c4a", marginBottom: 8 }}>📅 This Month</h4>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+            marginBottom: 8
+          }}>
+            <button onClick={handlePrevMonth} style={{
+              background: "#fce4ec",
+              border: "none",
+              borderRadius: 6,
+              padding: "4px 10px",
+              fontSize: 18,
+              color: "#d72660",
+              cursor: "pointer"
+            }} aria-label="Previous Month">&lt;</button>
+            <span style={{ fontWeight: "bold", fontSize: 18, color: "#1976d2" }}>
+              {monthNames[displayMonth]} {displayYear}
+            </span>
+            <button onClick={handleNextMonth} style={{
+              background: "#fce4ec",
+              border: "none",
+              borderRadius: 6,
+              padding: "4px 10px",
+              fontSize: 18,
+              color: "#d72660",
+              cursor: "pointer"
+            }} aria-label="Next Month">&gt;</button>
+          </div>
           <div style={{
             display: "flex",
             flexWrap: "wrap",
@@ -274,4 +374,4 @@ const CycleTracker = () => {
   );
 };
 
-export default CycleTracker; 
+export default CycleTracker;
