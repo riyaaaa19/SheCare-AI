@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import api from "../api";
+import * as api from "../api";
 
 // Helper function to calculate cycle day number from date string
 function getCycleDayNumber(cycleDayStr) {

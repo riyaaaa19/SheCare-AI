@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api";
+import * as api from "../api";
 
 const Signup = () => {
   const [name, setName] = useState("");

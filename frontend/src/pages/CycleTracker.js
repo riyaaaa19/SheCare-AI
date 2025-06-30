@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api from "../api";
+import * as api from "../api";
 
 // Always treat yyyy-mm-dd as local date, never use new Date(str) directly!
 function formatDate(date) {
