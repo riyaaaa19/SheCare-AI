@@ -1,5 +1,4 @@
 import axios from "axios";
-import { del as apiDelete } from "../api";
 
 // Use environment variable for backend base URL
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
@@ -73,4 +72,4 @@ export const getRecommendations = async () => {
 export const get = (url, config) => api.get(url, config);
 export const post = (url, data, config) => api.post(url, data, config);
 export const put = (url, data, config) => api.put(url, data, config);
-export const del = (url, config) => apiDelete(url, config);
+export const del = (url, config) => api.Delete(url, config);
