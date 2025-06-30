@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { checkPCOS } from "../api"; // <-- Add this line
 
 const SYMPTOMS = [
   "Irregular periods",
@@ -31,9 +32,14 @@ const SymptomForm = () => {
     }));
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    alert(JSON.stringify(form, null, 2)); // Replace with API call
+    try {
+      const result = await checkPCOS(form);
+      alert("Result: " + JSON.stringify(result, null, 2));
+    } catch (err) {
+      alert("Failed to submit: " + (err.response?.data?.detail || err.message));
+    }
   };
 
   return (
@@ -127,4 +133,4 @@ const SymptomForm = () => {
   );
 };
 
-export default SymptomForm; 
+export default SymptomForm;

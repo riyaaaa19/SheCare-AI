@@ -153,7 +153,7 @@ const CycleTracker = () => {
     setError("");
     const token = localStorage.getItem("shecare_token");
     api
-      .delete(`/cycle-tracker/${id}`,
+      .del(`/cycle-tracker/${id}`,
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       )
       .then(() => fetchEntries())

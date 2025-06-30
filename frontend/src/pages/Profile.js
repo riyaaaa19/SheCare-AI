@@ -73,7 +73,7 @@ const Profile = () => {
     setLoading(true);
     setError("");
     const token = localStorage.getItem("shecare_token");
-    api.delete("/profile", {
+    api.del("/profile", {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
       .then(() => {
