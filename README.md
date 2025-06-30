@@ -22,8 +22,7 @@
   Get contextual tips on health, well-being, and engagement based on your data.
 
 - 🤖 **AI Chatbot Integration**  
-  - **Google Gemini**: Ask health-related questions and receive context-aware answers
-  - **OmniDimension Voice Agent**: Advanced voice-enabled AI assistant for health queries
+   **OmniDimension Voice Agent**: Advanced voice-enabled AI assistant for health queries
 
 - 👤 **Profile Management**  
   Manage personal info such as age, height, weight, and cycle length.
