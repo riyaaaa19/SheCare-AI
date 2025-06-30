@@ -28,12 +28,6 @@
 - 👤 **Profile Management**  
   Manage personal info such as age, height, weight, and cycle length.
 
-- 🛠️ **Admin Panel**  
-  Comprehensive admin interface for:
-  - User analytics and insights
-  - Health tips management (CRUD operations)
-  - System logs monitoring
-  - Symptom form management
 
 - 🎯 **Enhanced Recommendations System**  
   Smart recommendations based on:
@@ -47,13 +41,12 @@
 ## 🧰 Tech Stack
 
 - **Backend**:  
-  `FastAPI`, `SQLAlchemy`, `SQLite`, `Pydantic`, `Passlib`, `python-jose`, `google-generativeai`, `omnidimension`
+  `FastAPI`, `SQLAlchemy`, `SQLite`, `Pydantic`, `Passlib`, `python-jose`, `omnidimension`
 
 - **Frontend**:  
   `React`, `Axios`, `Modern CSS`
 
 - **AI Services**:
-  - Google Gemini API for text-based chatbot
   - OmniDimension API for voice agent integration
 
 ---
@@ -84,7 +77,6 @@ DATABASE_TYPE=sqlite
 SECRET_KEY=your_super_secret_key_change_this_in_production
 
 # AI Service API Keys
-GOOGLE_API_KEY=your_google_gemini_api_key
 OMNIDIM_API_KEY=your_omnidimension_api_key
 
 # Optional: Database Configuration (if using PostgreSQL/MySQL)
@@ -148,7 +140,6 @@ npm start
 
 ### AI Chatbot
 - `POST /voice-chat` — Interact with OmniDimension voice agent
-
 
 ### Debug Endpoints
 - `GET /debug/cycle-tracker` — Debug cycle entries
