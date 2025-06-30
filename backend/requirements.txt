@@ -4,3 +4,4 @@ sqlalchemy
 python-dotenv
 passlib
 python-jose
+email-validator
