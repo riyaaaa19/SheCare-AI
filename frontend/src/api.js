@@ -1,14 +1,14 @@
 import axios from "axios";
 
-// Base URL of your deployed FastAPI backend
-const BASE_URL = "https://shecare-ai-hr5t.onrender.com";
+// Use environment variable for backend base URL
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 // Create an axios instance
 const api = axios.create({
   baseURL: BASE_URL,
 });
 
-// Function to set the JWT token in headers
+// Set JWT token in headers
 export const setAuthToken = (token) => {
   if (token) {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -26,7 +26,7 @@ export const signupUser = async (userData) => {
 // Login
 export const loginUser = async (credentials) => {
   const response = await api.post("/token", credentials);
-  return response.data; // Should return access_token and token_type
+  return response.data; // { access_token, token_type }
 };
 
 // Get current user profile
@@ -52,7 +52,7 @@ export const getCycleHistory = async () => {
   return response.data;
 };
 
-// Journal Entries
+// Journal
 export const createJournalEntry = async (data) => {
   const response = await api.post("/journal", data);
   return response.data;
