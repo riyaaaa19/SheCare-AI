@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Use environment variable for backend base URL
-const BASE_URL = "https://shecare-ai-hr5t.onrender.com";
+const BASE_URL = "https://shecare-ai-ax9t.onrender.com";
 
 // Create an axios instance
 const api = axios.create({
