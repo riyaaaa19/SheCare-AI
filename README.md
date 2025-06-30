@@ -22,18 +22,11 @@
   Get contextual tips on health, well-being, and engagement based on your data.
 
 - 🤖 **AI Chatbot Integration**  
-  - **Google Gemini**: Ask health-related questions and receive context-aware answers
-  - **OmniDimension Voice Agent**: Advanced voice-enabled AI assistant for health queries
+   **OmniDimension Voice Agent**: Advanced voice-enabled AI assistant for health queries
 
 - 👤 **Profile Management**  
   Manage personal info such as age, height, weight, and cycle length.
 
-- 🛠️ **Admin Panel**  
-  Comprehensive admin interface for:
-  - User analytics and insights
-  - Health tips management (CRUD operations)
-  - System logs monitoring
-  - Symptom form management
 
 - 🎯 **Enhanced Recommendations System**  
   Smart recommendations based on:
@@ -47,13 +40,12 @@
 ## 🧰 Tech Stack
 
 - **Backend**:  
-  `FastAPI`, `SQLAlchemy`, `SQLite`, `Pydantic`, `Passlib`, `python-jose`, `google-generativeai`, `omnidimension`
+  `FastAPI`, `SQLAlchemy`, `SQLite`, `Pydantic`, `Passlib`, `python-jose`, `omnidimension`
 
 - **Frontend**:  
   `React`, `Axios`, `Modern CSS`
 
 - **AI Services**:
-  - Google Gemini API for text-based chatbot
   - OmniDimension API for voice agent integration
 
 ---
@@ -84,7 +76,6 @@ DATABASE_TYPE=sqlite
 SECRET_KEY=your_super_secret_key_change_this_in_production
 
 # AI Service API Keys
-GOOGLE_API_KEY=your_google_gemini_api_key
 OMNIDIM_API_KEY=your_omnidimension_api_key
 
 # Optional: Database Configuration (if using PostgreSQL/MySQL)
@@ -147,16 +138,7 @@ npm start
 - `DELETE /recommendations/{rec_id}` — Delete recommendation
 
 ### AI Chatbot
-- `POST /chatbot` — Ask Google Gemini AI a question
 - `POST /voice-chat` — Interact with OmniDimension voice agent
-
-### Admin Panel
-- `GET /admin/analytics` — Get user analytics
-- `GET /admin/tips` — Get health tips
-- `POST /admin/tips` — Add health tip
-- `PUT /admin/tips/{id}` — Update health tip
-- `DELETE /admin/tips/{id}` — Delete health tip
-- `GET /admin/logs` — Get system logs
 
 ### Debug Endpoints
 - `GET /debug/cycle-tracker` — Debug cycle entries
@@ -178,12 +160,6 @@ npm start
 ---
 
 ## 🧠 AI Integration
-
-### Google Gemini Chatbot
-- Powered via `google-generativeai` SDK
-- Loads API key from `.env`
-- Uses JWT-authenticated user context (recent journals, mood, cycle) for smart responses
-- Returns plain text for simplicity and compatibility
 
 ### OmniDimension Voice Agent
 - Advanced voice-enabled AI assistant
@@ -209,25 +185,6 @@ The system analyzes multiple data points to provide personalized recommendations
 - 😊 **Mood**: Emotional well-being and stress management
 - 🏃‍♀️ **Activity**: Exercise and movement suggestions
 
----
-
-## 🛠️ Admin Features
-
-### Analytics Dashboard
-- User engagement metrics
-- Mood pattern analysis
-- PCOS risk distribution
-- Cycle tracking statistics
-
-### Health Tips Management
-- Create, edit, and delete health tips
-- Categorize tips by type
-- Monitor tip effectiveness
-
-### System Monitoring
-- Application logs
-- Error tracking
-- Performance metrics
 
 ---
 
@@ -241,12 +198,6 @@ The system analyzes multiple data points to provide personalized recommendations
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License — feel free to use and contribute.
-
----
-
 ## 🤝 Contributing
 
 Pull requests and issues are welcome!
@@ -254,8 +205,5 @@ For questions or contributions, please open an issue or pull request!
 
 ---
 
-<<<<<<< HEAD
 ## Made with 💗 to support women's health and wellness.
-=======
-## Made with 💗 to support women's health and wellness.
->>>>>>> 5fde7891d163de0fa7fe56b1c5fb3c7bdc824adf
+
