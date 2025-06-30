@@ -9,9 +9,9 @@ from typing import List, Optional
 import os
 import json
 from dotenv import load_dotenv
-from models import User, PCOSCheck, CycleEntry, JournalEntry, Recommendation
-from database import SessionLocal, engine
-import models
+from .models import User, PCOSCheck, CycleEntry, JournalEntry, Recommendation
+from .database import SessionLocal, engine
+from . import models
 
 # Load .env
 env_path = os.path.join(os.path.dirname(__file__), ".env")

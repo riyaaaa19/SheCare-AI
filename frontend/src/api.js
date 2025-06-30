@@ -1,52 +1,70 @@
 import axios from "axios";
 
+// Use environment variable for backend base URL
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
+// Create an axios instance
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: BASE_URL,
 });
 
-// Add a request interceptor to include the JWT token in every request
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("shecare_token"); // <-- match this to your Login.js
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-export const getRecommendations = async () => {
-  try {
-    console.log("Trying public recommendations endpoint...");
-    // First try the public endpoint
-    const response = await api.get("/recommendations/public");
-    console.log("Public recommendations response:", response.data);
-    if (response.data && Array.isArray(response.data)) {
-      return response.data;
-    } else {
-      throw new Error("Invalid response format");
-    }
-  } catch (error) {
-    console.error("Public endpoint failed:", error);
-    // If public endpoint fails, try authenticated endpoint
-    try {
-      const token = localStorage.getItem("shecare_token");
-      console.log("Token found:", !!token);
-      if (token) {
-        console.log("Trying authenticated recommendations endpoint...");
-        const authResponse = await api.get("/recommendations");
-        console.log("Authenticated recommendations response:", authResponse.data);
-        if (authResponse.data && Array.isArray(authResponse.data)) {
-          return authResponse.data;
-        }
-      }
-    } catch (authError) {
-      console.error("Both public and authenticated recommendations failed:", authError);
-    }
-    // If both fail, throw error to trigger fallback
-    throw new Error("Failed to fetch recommendations from API");
+// Set JWT token in headers
+export const setAuthToken = (token) => {
+  if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common["Authorization"];
   }
 };
 
-export default api;
+// Signup
+export const signupUser = async (userData) => {
+  const response = await api.post("/signup", userData);
+  return response.data;
+};
+
+// Login
+export const loginUser = async (credentials) => {
+  const response = await api.post("/token", credentials);
+  return response.data; // { access_token, token_type }
+};
+
+// Get current user profile
+export const getProfile = async () => {
+  const response = await api.get("/users/me");
+  return response.data;
+};
+
+// PCOS Checker
+export const checkPCOS = async (data) => {
+  const response = await api.post("/check_pcos", data);
+  return response.data;
+};
+
+// Cycle Tracker
+export const createCycleEntry = async (data) => {
+  const response = await api.post("/cycle", data);
+  return response.data;
+};
+
+export const getCycleHistory = async () => {
+  const response = await api.get("/cycle");
+  return response.data;
+};
+
+// Journal
+export const createJournalEntry = async (data) => {
+  const response = await api.post("/journal", data);
+  return response.data;
+};
+
+export const getJournalEntries = async () => {
+  const response = await api.get("/journal");
+  return response.data;
+};
+
+// Recommendations
+export const getRecommendations = async () => {
+  const response = await api.get("/recommendations");
+  return response.data;
+};
