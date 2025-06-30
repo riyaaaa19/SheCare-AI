@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -15,6 +15,20 @@ import OmniTextChatbot from "./pages/OmniTextChatbot";
 
 const NavBar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const handleLogout = () => {
+    localStorage.removeItem("shecare_user");
+    localStorage.removeItem("shecare_token");
+    navigate("/login");
+  };
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/dashboard", label: "Dashboard" },
+    { to: "/pcos-checker", label: "PCOS Checker" },
+    { to: "/cycle-tracker", label: "Cycle Tracker" },
+    { to: "/journal", label: "Journal" },
+    { to: "/recommendations", label: "Recommendations" },
+  ];
   return (
     <nav
       style={{
@@ -50,13 +64,44 @@ const NavBar = () => {
         <span role="img" aria-label="profile">👧</span>
       </div>
       <div style={{ display: "flex", gap: 40, flex: 1, justifyContent: "center" }}>
-        <Link to="/" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Home</Link>
-        <Link to="/dashboard" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Dashboard</Link>
-        <Link to="/pcos-checker" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>PCOS Checker</Link>
-        <Link to="/cycle-tracker" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Cycle Tracker</Link>
-        <Link to="/journal" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Journal</Link>
-        <Link to="/recommendations" style={{ color: "#d72660", fontWeight: "bold", fontSize: 22, textDecoration: "none" }}>Recommendations</Link>
+        {navLinks.map(link => (
+          <Link
+            key={link.to}
+            to={link.to}
+            style={{
+              color: location.pathname === link.to ? "#fff" : "#d72660",
+              background: location.pathname === link.to ? "#d72660" : "transparent",
+              fontWeight: "bold",
+              fontSize: 22,
+              textDecoration: "none",
+              borderRadius: 8,
+              padding: location.pathname === link.to ? "8px 18px" : undefined,
+              transition: "all 0.2s"
+            }}
+          >
+            {link.label}
+          </Link>
+        ))}
       </div>
+      <button
+        onClick={handleLogout}
+        style={{
+          marginLeft: "auto",
+          background: "#d72660",
+          color: "#fff",
+          border: "none",
+          borderRadius: 6,
+          padding: "10px 22px",
+          fontSize: 16,
+          fontWeight: 600,
+          cursor: "pointer",
+          boxShadow: "0 2px 8px rgba(215,38,96,0.08)",
+          transition: "background 0.2s"
+        }}
+        title="Logout"
+      >
+        Logout
+      </button>
     </nav>
   );
 };
@@ -88,139 +133,141 @@ function App() {
   const [showVoiceWidget, setShowVoiceWidget] = useState(false);
 
   return (
-    <Router>
-      <NavBar />
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #ffe0ec 0%, #f8f9fa 100%)" }}>
+      <Router>
+        <NavBar />
 
-      {/* Microphone Icon Button */}
-      <button
-        onClick={() => setShowVoiceWidget(true)}
-        style={{
-          position: "fixed",
-          bottom: 110,
-          right: 32,
-          background: "#fff",
-          color: "#d72660",
-          border: "2px solid #d72660",
-          borderRadius: "50%",
-          width: 56,
-          height: 56,
-          boxShadow: "0 2px 8px rgba(215,38,96,0.12)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 28,
-          cursor: "pointer",
-          zIndex: 1001
-        }}
-        title="Open Voice Agent"
-      >
-        <span role="img" aria-label="Microphone">🎤</span>
-      </button>
+        {/* Microphone Icon Button */}
+        <button
+          onClick={() => setShowVoiceWidget(true)}
+          style={{
+            position: "fixed",
+            bottom: 110,
+            right: 32,
+            background: "#fff",
+            color: "#d72660",
+            border: "2px solid #d72660",
+            borderRadius: "50%",
+            width: 56,
+            height: 56,
+            boxShadow: "0 2px 8px rgba(215,38,96,0.12)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 28,
+            cursor: "pointer",
+            zIndex: 1001
+          }}
+          title="Open Voice Agent"
+        >
+          <span role="img" aria-label="Microphone">🎤</span>
+        </button>
 
-      {/* Modal for Voice Agent */}
-      {showVoiceWidget && (
-        <>
-          <div
-            onClick={() => setShowVoiceWidget(false)}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100vh",
-              background: "rgba(0,0,0,0.25)",
-              zIndex: 1999
-            }}
-          />
-          <div
-            style={{
-              position: "fixed",
-              top: 80,
-              right: 40,
-              width: 340,
-              height: 480,
-              maxWidth: "95vw",
-              maxHeight: "90vh",
-              background: "#ffe0ec",
-              borderRadius: 16,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-              zIndex: 2000,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "stretch",
-              border: "1px solid #eee",
-              padding: 0,
-              overflow: "hidden"
-            }}
-          >
+        {/* Modal for Voice Agent */}
+        {showVoiceWidget && (
+          <>
+            <div
+              onClick={() => setShowVoiceWidget(false)}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+                background: "rgba(0,0,0,0.25)",
+                zIndex: 1999
+              }}
+            />
             <div
               style={{
+                position: "fixed",
+                top: 80,
+                right: 40,
+                width: 340,
+                height: 480,
+                maxWidth: "95vw",
+                maxHeight: "90vh",
+                background: "#ffe0ec",
+                borderRadius: 16,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+                zIndex: 2000,
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "12px 20px",
-                background: "#d72660",
-                color: "#fff",
-                borderTopLeftRadius: 16,
-                borderTopRightRadius: 16,
-                fontWeight: 600,
-                fontSize: 20
+                flexDirection: "column",
+                alignItems: "stretch",
+                border: "1px solid #eee",
+                padding: 0,
+                overflow: "hidden"
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <img src="/logo1.png" alt="SheCare AI Logo" style={{ width: 36, height: 36, borderRadius: "50%" }} />
-                <span>SheCare Voice Agent</span>
-              </div>
-              <button
-                onClick={() => setShowVoiceWidget(false)}
+              <div
                 style={{
-                  background: "transparent",
-                  border: "none",
-                  fontSize: 28,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "12px 20px",
+                  background: "#d72660",
                   color: "#fff",
-                  cursor: "pointer",
-                  marginLeft: 8
+                  borderTopLeftRadius: 16,
+                  borderTopRightRadius: 16,
+                  fontWeight: 600,
+                  fontSize: 20
                 }}
-                title="Close"
               >
-                ×
-              </button>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <img src="/logo1.png" alt="SheCare Logo" style={{ width: 60, height: 60, borderRadius: "50%" }} />
+                  <span>SheCare Voice Agent</span>
+                </div>
+                <button
+                  onClick={() => setShowVoiceWidget(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    fontSize: 28,
+                    color: "#fff",
+                    cursor: "pointer",
+                    marginLeft: 8
+                  }}
+                  title="Close"
+                >
+                  ×
+                </button>
+              </div>
+              <iframe
+                src="https://www.omnidim.io/voice-widget?secret=d23dc04eb6eef81dfaa93ec2a3bb09cb"
+                width="100%"
+                height="100%"
+                style={{
+                  border: "none",
+                  borderRadius: "0 0 16px 16px",
+                  flex: 1,
+                  minHeight: 0
+                }}
+                allow="microphone"
+                title="SheCare Voice Agent"
+              />
             </div>
-            <iframe
-              src="https://www.omnidim.io/voice-widget?secret=d23dc04eb6eef81dfaa93ec2a3bb09cb"
-              width="100%"
-              height="100%"
-              style={{
-                border: "none",
-                borderRadius: "0 0 16px 16px",
-                flex: 1,
-                minHeight: 0
-              }}
-              allow="microphone"
-              title="SheCare Voice Agent"
-            />
-          </div>
-        </>
-      )}
+          </>
+        )}
 
-      {/* OmniDimension SheBot floating chat icon */}
-      <OmniTextChatbot />
+        {/* OmniDimension SheBot floating chat icon */}
+        <OmniTextChatbot />
 
-      {/* Main App Routes */}
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/pcos-checker" element={<PCOSChecker />} />
-        <Route path="/cycle-tracker" element={<CycleTracker />} />
-        <Route path="/journal" element={<Journal />} />
-        {/* <Route path="/chatbot" element={<Chatbot />} /> */}
-        <Route path="/recommendations" element={<Recommendations />} />
-        <Route path="/admin" element={<AdminPanel />} />
-      </Routes>
-    </Router>
+        {/* Main App Routes */}
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/pcos-checker" element={<PCOSChecker />} />
+          <Route path="/cycle-tracker" element={<CycleTracker />} />
+          <Route path="/journal" element={<Journal />} />
+          {/* <Route path="/chatbot" element={<Chatbot />} /> */}
+          <Route path="/recommendations" element={<Recommendations />} />
+          <Route path="/admin" element={<AdminPanel />} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 
@@ -250,7 +297,7 @@ const Landing = () => (
         textAlign: "center"
       }}
     >
-      <img src="/logo1.png" alt="SheCare AI Logo" style={{ width: 280, marginBottom: 35 }} />
+      <img src="/logo1.png" alt="SheCare Logo" style={{ width: 340, marginBottom: 35 }} />
       <h1 style={{ fontSize: 36, color: "#d72660", marginBottom: 12 }}>SheCare AI</h1>
       <h2 style={{ fontWeight: 400, color: "#333", marginBottom: 24 }}>
         Empowering Women Through AI-Powered Health Insights

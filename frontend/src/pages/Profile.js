@@ -86,15 +86,7 @@ const Profile = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #f8f9fa 0%, #ffe0ec 100%)"
-      }}
-    >
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #ffe0ec 0%, #f8f9fa 100%)", padding: 32, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div
         style={{
           background: "#fff",

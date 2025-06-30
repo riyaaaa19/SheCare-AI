@@ -215,13 +215,7 @@ const CycleTracker = () => {
   const nextPeriod = getNextPeriodDate(events, userData.cycleLength);
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "linear-gradient(135deg, #ffe0ec 0%, #f8f9fa 100%)"
-    }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #ffe0ec 0%, #f8f9fa 100%)", padding: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{
         background: "#fff",
         padding: 36,

@@ -100,6 +100,7 @@ const PCOSChecker = () => {
     weight: "",
   });
   const [riskResult, setRiskResult] = useState(null);
+  const [tips, setTips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -152,13 +153,16 @@ const PCOSChecker = () => {
     api.post("/pcos-checker", payload, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
-      .then(res => setRiskResult(res.data.risk))
+      .then(res => {
+        setRiskResult(res.data.risk);
+        setTips(res.data.tips || []);
+      })
       .catch(() => setError("Failed to submit PCOS check."))
       .finally(() => setLoading(false));
   };
 
   return (
-    <div style={bgStyle}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #ffe0ec 0%, #f8f9fa 100%)", padding: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <form style={cardStyle} onSubmit={handleSubmit}>
         <h2 style={headingStyle}>Health Questionnaire</h2>
         {loading && <div style={{ color: "#d72660", marginBottom: 12 }}>Loading user data...</div>}
@@ -208,8 +212,27 @@ const PCOSChecker = () => {
         </div>
         <button type="submit" style={buttonStyle} disabled={loading}>Submit</button>
         {riskResult && (
-          <div style={resultStyle(riskResult)}>
-            Your estimated PCOS Risk: <span style={{ textDecoration: "underline" }}>{riskResult}</span>
+          <div style={{ marginTop: 28 }}>
+            <div style={resultStyle(riskResult)}>
+              Your estimated PCOS Risk: <span style={{ textDecoration: "underline" }}>{riskResult}</span>
+            </div>
+            {tips.length > 0 && (
+              <div style={{ marginTop: 20 }}>
+                <h3 style={{ color: "#d72660", fontSize: 18, marginBottom: 12 }}>Recommendations:</h3>
+                <ul style={{ textAlign: "left", paddingLeft: 20 }}>
+                  {tips.map((tip, index) => (
+                    <li key={index} style={{ 
+                      color: "#444", 
+                      marginBottom: 8, 
+                      fontSize: 14,
+                      lineHeight: 1.4
+                    }}>
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </form>
