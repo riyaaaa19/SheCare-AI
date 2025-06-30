@@ -207,5 +207,4 @@ For questions or contributions, please open an issue or pull request!
 ---
 
 ## Made with 💗 to support women's health and wellness.
-=======
 
