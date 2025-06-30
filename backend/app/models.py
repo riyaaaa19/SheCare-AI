@@ -6,7 +6,6 @@ from pydantic import BaseModel
 try:
     from .database import Base
 except ImportError:
-    # Try absolute import if relative import fails
     from database import Base
 
 class User(Base):
@@ -19,14 +18,11 @@ class User(Base):
     weight = Column(Integer, nullable=True)
     cycle_length = Column(Integer, nullable=True)
     bio = Column(Text, nullable=True)
-    # Relationship
+    # Relationships
     pcos_checks = relationship("PCOSCheck", back_populates="user")
     cycle_entries = relationship("CycleEntry", back_populates="user")
     journal_entries = relationship("JournalEntry", back_populates="user")
     recommendations = relationship("Recommendation", back_populates="user")
-
-    class Config:
-        from_attributes = True
 
 class PCOSCheck(Base):
     __tablename__ = "pcos_checks"
@@ -68,11 +64,25 @@ class Recommendation(Base):
     date = Column(DateTime, default=datetime.utcnow)
     user = relationship("User", back_populates="recommendations") 
 
-    class Config:
-        from_attributes = True 
-
+# Example Pydantic model (add your own as needed)
 class JournalEntryIn(BaseModel):
     date: datetime = None
     mood: str
     text: str
-    analysis: str = None 
+    analysis: str = None
+
+    model_config = {
+        "from_attributes": True
+    }
+class UserOut(BaseModel):
+    id: int
+    email: str
+    full_name: str | None = None
+    age: int | None = None
+    weight: int | None = None
+    cycle_length: int | None = None
+    bio: str | None = None
+
+    model_config = {
+        "from_attributes": True
+    }
