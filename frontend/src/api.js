@@ -68,3 +68,5 @@ export const getRecommendations = async () => {
   const response = await api.get("/recommendations");
   return response.data;
 };
+
+export const apiGet = (url, config) => api.get(url, config);
