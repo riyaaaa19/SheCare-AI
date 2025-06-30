@@ -254,4 +254,8 @@ For questions or contributions, please open an issue or pull request!
 
 ---
 
+<<<<<<< HEAD
 ## Made with 💗 to support women's health and wellness.
+=======
+## Made with 💗 to support women's health and wellness.
+>>>>>>> 5fde7891d163de0fa7fe56b1c5fb3c7bdc824adf
