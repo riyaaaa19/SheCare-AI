@@ -1,1 +1,4 @@
-fastapi\nuvicorn[standard]
+fastapi
+uvicorn[standard]
+sqlalchemy
+python-dotenv
