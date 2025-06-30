@@ -125,7 +125,7 @@ const Journal = () => {
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f8f9fa 0%, #ffe0ec 100%)", padding: 16 }}>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #ffe0ec 0%, #f8f9fa 100%)", padding: 16 }}>
       <div style={{ background: "#fff", padding: 36, borderRadius: 24, boxShadow: "0 4px 32px rgba(215,38,96,0.10)", minWidth: 320, maxWidth: 480, width: "100%", transition: "box-shadow 0.3s", margin: 8 }}>
         <h2 style={{ color: "#d72660", marginBottom: 24, textAlign: "center", fontWeight: 700, letterSpacing: 1 }}>Emotional Health Journal</h2>
         {userLoading && <div style={{ color: "#d72660", marginBottom: 12 }}>Loading user data...</div>}

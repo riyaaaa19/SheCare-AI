@@ -32,7 +32,7 @@ const Dashboard = () => {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(135deg, #f8f9fa 0%, #ffe0ec 100%)",
+      background: "linear-gradient(135deg, #ffe0ec 0%, #f8f9fa 100%)",
       padding: 32
     }}>
       <div style={{

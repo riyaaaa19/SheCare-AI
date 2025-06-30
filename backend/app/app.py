@@ -9,9 +9,9 @@ from typing import List, Optional
 import os
 import json
 from dotenv import load_dotenv
-from .models import User, PCOSCheck, CycleEntry, JournalEntry, Recommendation
-from .database import SessionLocal, engine
-from . import models
+from models import User, PCOSCheck, CycleEntry, JournalEntry, Recommendation
+from database import SessionLocal, engine
+import models
 
 # Load .env
 env_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -54,7 +54,7 @@ class UserOut(BaseModel):
     bio: Optional[str] = None
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
@@ -87,11 +87,11 @@ class PCOSCheckOut(BaseModel):
     tips: Optional[List[str]] = None
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class CycleEntryIn(BaseModel):
-    start_date: datetime
-    end_date: Optional[datetime] = None
+    start_date: str  # Accept date string like "2024-01-15"
+    end_date: Optional[str] = None
     notes: Optional[str] = None
 
 class CycleEntryOut(BaseModel):
@@ -101,7 +101,7 @@ class CycleEntryOut(BaseModel):
     notes: Optional[str] = None
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class JournalEntryIn(BaseModel):
     date: Optional[datetime] = None
@@ -115,7 +115,7 @@ class JournalEntryOut(BaseModel):
     text: str
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class RecommendationOut(BaseModel):
     id: int
@@ -124,7 +124,7 @@ class RecommendationOut(BaseModel):
     date: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 # --- Dependencies ---
 def get_db():
@@ -263,24 +263,61 @@ def get_dashboard(
 # --- PCOS Checker ---
 @app.post("/pcos-checker", response_model=PCOSCheckOut)
 def pcos_checker(
-    data: PCOSCheckIn,
+    form: dict = Body(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Risk logic
-    risk = "Low"
-    if "Irregular periods" in data.symptoms and "Weight gain" in data.symptoms:
+    # Extract data from the form
+    age = form.get("age")
+    weight = form.get("weight")
+    symptoms = form.get("symptoms", [])
+    
+    # Debug logging
+    print(f"DEBUG: Received form data: {form}")
+    print(f"DEBUG: Extracted symptoms: {symptoms}")
+    print(f"DEBUG: Symptoms count: {len(symptoms)}")
+    
+    # Risk logic based on number of symptoms
+    symptoms_count = len(symptoms)
+    
+    if symptoms_count >= 4:
         risk = "High"
-    # Example tips
+    elif symptoms_count >= 2:
+        risk = "Moderate"
+    else:
+        risk = "Low"
+    
+    print(f"DEBUG: Calculated risk: {risk}")
+    
+    # Enhanced tips based on risk level
     tips = []
     if risk == "High":
-        tips.append("Consult a gynecologist for further evaluation.")
-        tips.append("Maintain a healthy diet and exercise regularly.")
+        tips = [
+            "Consult a healthcare provider for a detailed diagnosis and management plan.",
+            "Discuss possible treatments and lifestyle changes.",
+            "Seek support for emotional well-being if needed.",
+            "Consider consulting a gynecologist or endocrinologist."
+        ]
+    elif risk == "Moderate":
+        tips = [
+            "Consider consulting a gynecologist for further evaluation.",
+            "Adopt a healthy lifestyle: balanced diet, exercise, stress management.",
+            "Monitor symptoms and menstrual cycle closely.",
+            "Track your symptoms regularly to identify patterns."
+        ]
+    else:
+        tips = [
+            "Maintain a balanced diet and regular exercise.",
+            "Continue tracking your cycle and symptoms.",
+            "Schedule regular checkups with your doctor.",
+            "Stay informed about PCOS symptoms and risk factors."
+        ]
+    
     # Store answers as JSON string
     pcos_entry = PCOSCheck(
         user_id=current_user.id,
         date=datetime.utcnow(),
-        answers=json.dumps(data.symptoms),
+        answers=json.dumps(form),
         risk=risk,
         tips=json.dumps(tips)
     )
@@ -291,9 +328,9 @@ def pcos_checker(
     return PCOSCheckOut(
         id=pcos_entry.id,
         date=pcos_entry.date,
-        age=getattr(pcos_entry, "age", data.age),
-        weight=getattr(pcos_entry, "weight", data.weight),
-        answers=data.symptoms,
+        age=age,
+        weight=weight,
+        answers=symptoms,
         risk=pcos_entry.risk,
         tips=tips
     )
@@ -328,10 +365,14 @@ def add_cycle_entry(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # Convert date strings to datetime objects
+    start_date = datetime.fromisoformat(data.start_date)
+    end_date = datetime.fromisoformat(data.end_date) if data.end_date else None
+    
     entry = CycleEntry(
         user_id=current_user.id,
-        start_date=data.start_date,
-        end_date=data.end_date,
+        start_date=start_date,
+        end_date=end_date,
         notes=data.notes
     )
     db.add(entry)
@@ -397,20 +438,172 @@ def delete_journal_entry(
     return {"message": "Journal entry deleted."}
 
 # --- Recommendations ---
+@app.get("/recommendations/public")
+def get_public_recommendations():
+    """Public recommendations that don't require authentication"""
+    current_time = datetime.utcnow()
+    return [
+        {
+            "id": 1,
+            "type": "general",
+            "text": "Stay hydrated and listen to your body today.",
+            "date": current_time.isoformat()
+        },
+        {
+            "id": 2,
+            "type": "wellness",
+            "text": "Your body needs rest — take it slow and breathe.",
+            "date": current_time.isoformat()
+        },
+        {
+            "id": 3,
+            "type": "nutrition",
+            "text": "Eat fresh, move gently, and love yourself today.",
+            "date": current_time.isoformat()
+        },
+        {
+            "id": 4,
+            "type": "mood",
+            "text": "Mood dips detected — try journaling or light meditation.",
+            "date": current_time.isoformat()
+        },
+        {
+            "id": 5,
+            "type": "cycle",
+            "text": "Your cycle is approaching — prep with warm teas and comfort foods.",
+            "date": current_time.isoformat()
+        },
+        {
+            "id": 6,
+            "type": "nutrition",
+            "text": "Avoid junk food today for better energy and mood.",
+            "date": current_time.isoformat()
+        },
+        {
+            "id": 7,
+            "type": "wellness",
+            "text": "Try 10 minutes of gentle yoga or stretching to ease tension.",
+            "date": current_time.isoformat()
+        },
+        {
+            "id": 8,
+            "type": "nutrition",
+            "text": "Include healthy fats like avocado and nuts in your meals today.",
+            "date": current_time.isoformat()
+        },
+        {
+            "id": 9,
+            "type": "mood",
+            "text": "Start your day with 5 minutes of gratitude journaling.",
+            "date": current_time.isoformat()
+        },
+        {
+            "id": 10,
+            "type": "wellness",
+            "text": "Aim for 7-9 hours of quality sleep tonight for better recovery.",
+            "date": current_time.isoformat()
+        }
+    ]
+
 @app.get("/recommendations", response_model=List[RecommendationOut])
 def get_recommendations(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    recs = db.query(Recommendation).filter(Recommendation.user_id == current_user.id).all()
-    # If no recommendations, return demo data
+    recs = []
+
+    # 1. Cycle Tracker Data
+    latest_cycle = db.query(CycleEntry).filter(CycleEntry.user_id == current_user.id).order_by(CycleEntry.start_date.desc()).first()
+    if latest_cycle:
+        recs.append(RecommendationOut(
+            id=1001, type="cycle", text="Your period started on {}. Remember to track your symptoms!".format(latest_cycle.start_date.strftime("%b %d")),
+            date=latest_cycle.start_date
+        ))
+
+    # 2. Journal Data
+    latest_journal = db.query(JournalEntry).filter(JournalEntry.user_id == current_user.id).order_by(JournalEntry.date.desc()).first()
+    if latest_journal and "sad" in latest_journal.mood.lower():
+        recs.append(RecommendationOut(
+            id=1002, type="mood", text="We noticed a low mood entry. Try some self-care or journaling today! 😊",
+            date=latest_journal.date
+        ))
+
+    # 3. PCOS Checker Data
+    latest_pcos = db.query(PCOSCheck).filter(PCOSCheck.user_id == current_user.id).order_by(PCOSCheck.date.desc()).first()
+    if latest_pcos and latest_pcos.risk == "High":
+        recs.append(RecommendationOut(
+            id=1003, type="pcos", text="Your recent PCOS check suggests high risk. Consider consulting a specialist. 🩺",
+            date=latest_pcos.date
+        ))
+
+    # Add global recommendations from database
+    global_recs = db.query(Recommendation).filter(Recommendation.user_id == None).all()
+    for i, global_rec in enumerate(global_recs):
+        recs.append(RecommendationOut(
+            id=2000 + i,
+            type=global_rec.type,
+            text=global_rec.text,
+            date=global_rec.date
+        ))
+
+    # If still no recommendations, add some default ones
     if not recs:
-        demo = [
-            RecommendationOut(id=1, type="Health", text="Stay hydrated and exercise regularly.", date=datetime.utcnow()),
-            RecommendationOut(id=2, type="Mental", text="Practice mindfulness and journaling.", date=datetime.utcnow())
+        current_time = datetime.utcnow()
+        default_recs = [
+            RecommendationOut(
+                id=3001, type="general", 
+                text="Stay hydrated and listen to your body today.",
+                date=current_time
+            ),
+            RecommendationOut(
+                id=3002, type="wellness", 
+                text="Your body needs rest — take it slow and breathe.",
+                date=current_time
+            ),
+            RecommendationOut(
+                id=3003, type="nutrition", 
+                text="Eat fresh, move gently, and love yourself today.",
+                date=current_time
+            ),
+            RecommendationOut(
+                id=3004, type="mood", 
+                text="Start your day with 5 minutes of gratitude journaling.",
+                date=current_time
+            ),
+            RecommendationOut(
+                id=3005, type="cycle", 
+                text="Track your cycle regularly to understand your body better.",
+                date=current_time
+            ),
+            RecommendationOut(
+                id=3006, type="wellness", 
+                text="Try 10 minutes of gentle yoga or stretching to ease tension.",
+                date=current_time
+            ),
+            RecommendationOut(
+                id=3007, type="nutrition", 
+                text="Include healthy fats like avocado and nuts in your meals today.",
+                date=current_time
+            ),
+            RecommendationOut(
+                id=3008, type="mood", 
+                text="Connect with a friend or family member for emotional support.",
+                date=current_time
+            ),
+            RecommendationOut(
+                id=3009, type="wellness", 
+                text="Take a 20-minute walk in nature to boost your mood.",
+                date=current_time
+            ),
+            RecommendationOut(
+                id=3010, type="nutrition", 
+                text="Drink herbal teas like chamomile or peppermint for relaxation.",
+                date=current_time
+            )
         ]
-        return demo
-    return [RecommendationOut.from_orm(r) for r in recs]
+        recs.extend(default_recs)
+
+    return recs
 
 @app.delete("/recommendations/{rec_id}")
 def delete_recommendation(
