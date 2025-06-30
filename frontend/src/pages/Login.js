@@ -18,13 +18,11 @@ const Login = () => {
     setError("");
     setLoading(true);
     try {
-      // 1. Login and get token
       const res = await api.loginUser({ email, password });
       const { access_token } = res;
-      api.setAuthToken(access_token); // set token for future requests
-      // 2. Fetch user info with token
-      const userRes = await api.getProfile();
-      localStorage.setItem("shecare_user", JSON.stringify(userRes.data));
+      localStorage.setItem("shecare_token", access_token);
+      api.setAuthToken(access_token);
+      // Optionally fetch user profile here
       setLoading(false);
       navigate("/dashboard");
     } catch (err) {

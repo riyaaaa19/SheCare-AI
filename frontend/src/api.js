@@ -25,7 +25,7 @@ export const signupUser = async (userData) => {
 
 // Login
 export const loginUser = async (credentials) => {
-  const response = await api.post("/token", credentials);
+  const response = await api.post("/auth/login", credentials);
   return response.data; // { access_token, token_type }
 };
 
