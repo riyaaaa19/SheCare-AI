@@ -1,6 +1,6 @@
 # SheCare AI
 
-**SheCare AI** is a comprehensive health tracking and wellness assistant platform designed specifically for women. It empowers users with tools to track menstrual cycles, log moods and symptoms, assess PCOS risk, receive personalized health recommendations, and interact with an AI-powered chatbot for timely support.
+**SheCare AI** is a comprehensive health tracking and wellness assistant platform designed specifically for women. It empowers users with tools to track menstrual cycles, log moods and symptoms, assess PCOS risk, receive personalized health recommendations, and interact with AI-powered chatbots for timely support.
 
 ---
 
@@ -21,21 +21,40 @@
 - 💡 **Personalized Recommendations**  
   Get contextual tips on health, well-being, and engagement based on your data.
 
-- 🤖 **AI Chatbot (Google Gemini)**  
-  Ask health-related questions and receive context-aware answers.
+- 🤖 **AI Chatbot Integration**  
+  - **Google Gemini**: Ask health-related questions and receive context-aware answers
+  - **OmniDimension Voice Agent**: Advanced voice-enabled AI assistant for health queries
 
 - 👤 **Profile Management**  
   Manage personal info such as age, height, weight, and cycle length.
+
+- 🛠️ **Admin Panel**  
+  Comprehensive admin interface for:
+  - User analytics and insights
+  - Health tips management (CRUD operations)
+  - System logs monitoring
+  - Symptom form management
+
+- 🎯 **Enhanced Recommendations System**  
+  Smart recommendations based on:
+  - Cycle patterns and irregularities
+  - Mood tracking data
+  - PCOS risk assessments
+  - Wellness and nutrition tips
 
 ---
 
 ## 🧰 Tech Stack
 
 - **Backend**:  
-  `FastAPI`, `SQLAlchemy`, `SQLite`, `Pydantic`, `Passlib`, `python-jose`, `google-generativeai`
+  `FastAPI`, `SQLAlchemy`, `SQLite`, `Pydantic`, `Passlib`, `python-jose`, `google-generativeai`, `omnidimension`
 
 - **Frontend**:  
   `React`, `Axios`, `Modern CSS`
+
+- **AI Services**:
+  - Google Gemini API for text-based chatbot
+  - OmniDimension API for voice agent integration
 
 ---
 
@@ -49,22 +68,38 @@ cd SheCare-AI
 
 ### 2. Backend Setup
 ```bash
-cd backend
+cd backend/app
 python -m venv venv
 venv\Scripts\activate  # On Windows
-pip install -r app/requirements.txt
+pip install -r requirements.txt
 ```
 
-- **Environment Variables**: Create a .env file in backend/app/ and include the following:
+- **Environment Variables**: Create a `.env` file in `backend/app/` and include the following:
 
-- `DATABASE_TYPE`: Database backend (default: sqlite)
-- `SECRET_KEY`: Secret for JWT signing (keep this private!)
-- `GOOGLE_API_KEY`: Google Gemini API key for chatbot (keep this private!)
-- **Database**: The app uses SQLite by default. The database file is `backend/shecare.db`.
+```env
+# Database Configuration
+DATABASE_TYPE=sqlite
+
+# JWT Configuration
+SECRET_KEY=your_super_secret_key_change_this_in_production
+
+# AI Service API Keys
+GOOGLE_API_KEY=your_google_gemini_api_key
+OMNIDIM_API_KEY=your_omnidimension_api_key
+
+# Optional: Database Configuration (if using PostgreSQL/MySQL)
+# POSTGRES_HOST=localhost
+# POSTGRES_PORT=5432
+# POSTGRES_USER=shecare_user
+# POSTGRES_PASSWORD=shecare_password
+# POSTGRES_DB=shecare_db
+```
+
+- **Database**: The app uses SQLite by default. The database file is `backend/app/shecare.db`.
 - **Run the Backend**:
   ```bash
-  cd backend
-  python -m uvicorn app.app:app --reload
+  cd backend/app
+  python -m uvicorn app:app --reload
   ```
   The API will be available at `http://localhost:8000`.
 
@@ -75,62 +110,148 @@ npm install
 npm start
 ```
 - The frontend will run at `http://localhost:3000`.
-- ⚠️Ensure the backend server is running for full app functionality.
+- ⚠️ Ensure the backend server is running for full app functionality.
 
+---
 
-## Authentication
+## 🔧 API Endpoints
+
+### Authentication
+- `POST /auth/signup` — Register a new user
+- `POST /auth/login` — Login and receive JWT token
+- `GET /auth/me` — Get current user info
+
+### Core Features
+- `GET /dashboard` — Get user dashboard data
+- `GET /profile` — Get user profile
+- `PUT /profile` — Update user profile
+
+### Cycle Tracking
+- `POST /cycle-tracker` — Add a cycle entry
+- `GET /cycle-tracker` — List cycle entries
+- `DELETE /cycle-tracker/{entry_id}` — Delete cycle entry
+
+### Journal
+- `POST /journal` — Add a journal entry
+- `GET /journal` — List journal entries
+- `DELETE /journal/{journal_id}` — Delete journal entry
+
+### PCOS Checker
+- `POST /pcos-checker` — Submit PCOS check
+- `GET /pcos-checker` — List PCOS checks
+- `DELETE /pcos-checker/{pcos_id}` — Delete PCOS check
+
+### Recommendations
+- `GET /recommendations` — Get personalized recommendations
+- `GET /recommendations/public` — Get public health tips
+- `DELETE /recommendations/{rec_id}` — Delete recommendation
+
+### AI Chatbot
+- `POST /chatbot` — Ask Google Gemini AI a question
+- `POST /voice-chat` — Interact with OmniDimension voice agent
+
+### Admin Panel
+- `GET /admin/analytics` — Get user analytics
+- `GET /admin/tips` — Get health tips
+- `POST /admin/tips` — Add health tip
+- `PUT /admin/tips/{id}` — Update health tip
+- `DELETE /admin/tips/{id}` — Delete health tip
+- `GET /admin/logs` — Get system logs
+
+### Debug Endpoints
+- `GET /debug/cycle-tracker` — Debug cycle entries
+- `GET /debug/pcos-checker` — Debug PCOS checks
+- `GET /health` — Health check endpoint
+
+---
+
+## 🔐 Authentication
+
 - JWT tokens are used for all protected endpoints.
-- JWT tokens are issued upon login and stored in localStorage as token.
+- JWT tokens are issued upon login and stored in localStorage as `token`.
 - All protected API calls must include the token in headers:
 
   ```
   Authorization: Bearer <token>
   ```
 
-## API Endpoints (Key)
-- `POST /auth/signup` — Register a new user
-- `POST /auth/login` — Login and receive JWT token
-- `GET /dashboard` — Get user dashboard data
-- `POST /cycle-tracker` — Add a cycle entry
-- `GET /cycle-tracker` — List cycle entries
-- `POST /journal` — Add a journal entry
-- `GET /journal` — List journal entries
-- `POST /pcos-checker` — Submit PCOS check
-- `GET /pcos-checker` — List PCOS checks
-- `GET /recommendations` — Get personalized recommendations
-- `POST /chatbot` — Ask the AI chatbot a question
+---
 
-## Recommendations Logic
-- Cycle, mood, symptoms, hydration, engagement, and PCOS data are analyzed.
-- Only one cycle-related recommendation is shown at a time (short, long, irregular, or normal).
-- All recommendations use emoji at the start for clarity and engagement.
-- Example recommendations:
-  - 🩺 Your cycles are shorter than average. Consider consulting a gynecologist.
-  - 😴 You've mentioned tiredness or sleep. Prioritize rest and good sleep hygiene for better well-being.
-  - 🧬 Maintain a healthy diet, exercise regularly, and consult a gynecologist if concerned.
+## 🧠 AI Integration
 
-## Chatbot Integration
-- Powered via google-generativeai SDK.
-- Loads API key from `.env`.
-- Uses JWT-authenticated user context (recent journals, mood, cycle) for smart responses.
-- Only returns plain text for simplicity and compatibility.
+### Google Gemini Chatbot
+- Powered via `google-generativeai` SDK
+- Loads API key from `.env`
+- Uses JWT-authenticated user context (recent journals, mood, cycle) for smart responses
+- Returns plain text for simplicity and compatibility
 
+### OmniDimension Voice Agent
+- Advanced voice-enabled AI assistant
+- Integrated via OmniDimension API
+- Provides voice-based health consultations
+- Requires `OMNIDIM_API_KEY` in environment variables
 
-## Troubleshooting
+---
+
+## 📊 Recommendations Logic
+
+The system analyzes multiple data points to provide personalized recommendations:
+
+- **Cycle Analysis**: Detects short, long, irregular, or normal cycles
+- **Mood Tracking**: Monitors emotional patterns and suggests mood-boosting activities
+- **PCOS Risk**: Provides guidance based on risk assessment results
+- **Wellness Tips**: Offers nutrition, exercise, and self-care suggestions
+
+### Recommendation Types
+- 🩺 **Medical**: Cycle irregularities, PCOS concerns
+- 😴 **Wellness**: Sleep, rest, and relaxation tips
+- 🥗 **Nutrition**: Diet and hydration advice
+- 😊 **Mood**: Emotional well-being and stress management
+- 🏃‍♀️ **Activity**: Exercise and movement suggestions
+
+---
+
+## 🛠️ Admin Features
+
+### Analytics Dashboard
+- User engagement metrics
+- Mood pattern analysis
+- PCOS risk distribution
+- Cycle tracking statistics
+
+### Health Tips Management
+- Create, edit, and delete health tips
+- Categorize tips by type
+- Monitor tip effectiveness
+
+### System Monitoring
+- Application logs
+- Error tracking
+- Performance metrics
+
+---
+
+## 🚨 Troubleshooting
+
 - **401 Unauthorized**: Log out and log in again to get a fresh token. Ensure the token uses the `sub` field for user ID.
-- **Failed to get AI response**: Check backend logs for errors, ensure the Google API key is valid, and the token is sent in the Authorization header.
+- **Failed to get AI response**: Check backend logs for errors, ensure the API keys are valid, and the token is sent in the Authorization header.
 - **Database issues**: Delete `shecare.db` and restart the backend to reset data (for development only).
 - **CORS errors**: The backend enables CORS for all origins by default.
+- **Voice agent issues**: Verify `OMNIDIM_API_KEY` is set correctly in environment variables.
+
+---
 
 ## 📄 License
 
 This project is licensed under the MIT License — feel free to use and contribute.
+
+---
 
 ## 🤝 Contributing
 
 Pull requests and issues are welcome!
 For questions or contributions, please open an issue or pull request!
 
-## Made with 💗 to support women's health and wellness.
-
 ---
+
+## Made with 💗 to support women's health and wellness.
