@@ -9,7 +9,7 @@ from typing import List, Optional
 import os
 import json
 from dotenv import load_dotenv
-from models import User, PCOSCheck, CycleEntry, JournalEntry, Recommendation
+from .models import User, PCOSCheck, CycleEntry, JournalEntry, Recommendation
 from database import SessionLocal, engine
 import models
 
